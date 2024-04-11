@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_file,request
+from flask import Flask, jsonify, send_file,make_response, request
 import os
 from models import db, init_app
 from dotenv import load_dotenv
@@ -7,6 +7,8 @@ from services.report_service import ReportService
 import uuid
 from models.report import Report
 import threading
+from datetime import datetime, timezone
+
 
 load_dotenv()
 
@@ -14,11 +16,9 @@ app = Flask(__name__)
 app.config.from_object('config.Config')
 init_app(app)
 
-
 @app.route('/')
-def home():
-    print(os.getenv('anuj'))
-    return "Hello World"
+def index():
+    return str(datetime.now(timezone.utc))
 
 @app.route('/trigger_report', methods=['POST'])
 def trigger_report():
@@ -33,13 +33,21 @@ def trigger_report():
 
     return jsonify({'report_id': report_id})
 
-@app.route('/get_report/<report_id>', methods=['GET'])
-def get_report(report_id):
-    report = Report.query.get(report_id)
+@app.route('/get_report', methods=['GET'])
+def get_report():
+    report_id = request.args.get('report_id')
+    report = db.session.get(Report, report_id)
     if report.status == 'Running':
         return jsonify({'status': 'Running'})
     elif report.status == 'Complete':
-        return send_file(report.file_path, as_attachment=True)
+        # return send_file(report.file_path, as_attachment=True)
+        # # Create a custom response object
+        response = make_response(send_file(report.file_path, as_attachment=True))
+        
+        # # Add the status to the response headers
+        response.headers['X-Report-Status'] = 'Complete'
+        # # Return the response
+        return response
     else:
         return jsonify({'error': 'Invalid report status'})
 
