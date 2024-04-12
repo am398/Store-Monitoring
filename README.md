@@ -2,6 +2,8 @@
 
 Welcome to the Store Monitoring project ! This repository contains tools and methods for monitoring the stores and check if the store is online or not and generate reports on uptime and downtime statistics.
 
+The project uses the **Flask** framework for building the application, **SQLite** as the database, and **SQLAlchemy** as the ORM tool. I used my `seed_db.py` file to fill the values in my database.
+
 ## [Assignment Details](https://loopxyz.notion.site/Take-home-interview-Store-Monitoring-12664a3c7fdf472883a41457f0c9347d)
 
 ---
