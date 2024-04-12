@@ -77,7 +77,7 @@ class ReportService:
 
         # Get the list of unique store IDs
 
-        self.store_ids = set(store_status.store_id for store_status in StoreStatus.query.limit(50).all())
+        self.store_ids = set(store_status.store_id for store_status in StoreStatus.query.limit(200).all())
         store_ids = self.store_ids
 
         # Use a ThreadPoolExecutor to execute the worker function concurrently for each store ID
