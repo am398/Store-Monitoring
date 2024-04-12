@@ -5,7 +5,7 @@ from models.store_status import StoreStatus
 from models.store_timezone import StoreTimezone
 from models.report import Report
 from datetime import timedelta,datetime,timezone
-from utils.time_utils import convert_to_local_time, overlap_hours
+from utils.time_utils import convert_to_local_time
 import csv
 import os
 from concurrent.futures import ThreadPoolExecutor
@@ -40,7 +40,7 @@ class ReportService:
                 data_queue = Queue()
 
                 # Start a separate thread to handle writing data to the CSV file
-                writer_thread = Thread(target=self.write_data_to_csv, args=(csv_file, writer, data_queue))
+                writer_thread = Thread(target=self.write_data_to_csv, args=(writer, data_queue))
                 writer_thread.start()
 
                 # Generate the report data and pass it to the queue
@@ -60,11 +60,12 @@ class ReportService:
         except Exception as e:
             self.app.logger.error(f"Error generating report {report_id}: {e}")
 
-    def write_data_to_csv(self, csv_file, writer, data_queue):
+    def write_data_to_csv(self, writer, data_queue):
         while True:
             # Get data from the queue
             data = data_queue.get()
 
+            print(data)
             # If data is None, break the loop (stop the thread)
             if data is None:
                 break
@@ -76,7 +77,7 @@ class ReportService:
 
         # Get the list of unique store IDs
 
-        self.store_ids= set(store_status.store_id for store_status in StoreStatus.query.limit(100).all())
+        self.store_ids = set(store_status.store_id for store_status in StoreStatus.query.limit(50).all())
         store_ids = self.store_ids
 
         # Use a ThreadPoolExecutor to execute the worker function concurrently for each store ID
@@ -101,6 +102,7 @@ class ReportService:
 
                 # Pass the row data to the queue for the writer thread to write to the CSV file
                 data_queue.put(row_data)
+
 
             # Submit tasks to the executor for each store ID
             for store_id in store_ids:
@@ -128,7 +130,7 @@ class ReportService:
 
                 if overlap_minutes:
                     try:
-                        active_ratio =get_active_ratio_for_hour(store_id, start_time, business_hour)
+                        active_ratio =get_active_ratio_for_hour(local_time,store_id, start_time, business_hour,business_hours)
                         uptime += active_ratio * overlap_minutes
                         downtime += (1 - active_ratio) * overlap_minutes
                     except Exception as e:
