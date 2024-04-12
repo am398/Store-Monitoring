@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, send_file,make_response, request
-import os
 from models import db, init_app
 from dotenv import load_dotenv
 from services.report_service import ReportService
@@ -14,10 +13,6 @@ load_dotenv()
 app = Flask(__name__)
 app.config.from_object('config.Config')
 init_app(app)
-
-@app.route('/')
-def index():
-    return str(datetime.now(timezone.utc))
 
 @app.route('/trigger_report', methods=['POST'])
 def trigger_report():

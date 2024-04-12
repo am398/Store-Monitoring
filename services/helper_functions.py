@@ -3,7 +3,6 @@ from models.store_status import StoreStatus
 from datetime import datetime, timedelta
 
 
-
 def get_overlap_minutes( local_time, business_hour):
     if business_hour[0] is None and business_hour[1] is None:
         # If business hours are not available, assume the store is open 24 hours

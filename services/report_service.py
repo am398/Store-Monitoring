@@ -4,7 +4,7 @@ from models.business_hour import BusinessHour
 from models.store_status import StoreStatus
 from models.store_timezone import StoreTimezone
 from models.report import Report
-from datetime import timedelta,datetime,timezone
+from datetime import timedelta
 from utils.time_utils import convert_to_local_time
 import csv
 import os
@@ -77,7 +77,7 @@ class ReportService:
 
         # Get the list of unique store IDs
 
-        self.store_ids = set(store_status.store_id for store_status in StoreStatus.query.limit(200).all())
+        self.store_ids = set(store_status.store_id for store_status in StoreStatus.query.all())
         store_ids = self.store_ids
 
         # Use a ThreadPoolExecutor to execute the worker function concurrently for each store ID
