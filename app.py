@@ -9,7 +9,6 @@ from models.report import Report
 import threading
 from datetime import datetime, timezone
 
-
 load_dotenv()
 
 app = Flask(__name__)
@@ -46,6 +45,7 @@ def get_report():
         
         # # Add the status to the response headers
         response.headers['X-Report-Status'] = 'Complete'
+        
         # # Return the response
         return response
     else:
