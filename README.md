@@ -52,15 +52,31 @@ The method involves:
 
 ### **Uptime and Downtime Calculation**
 
-The `calculate_uptime_downtime` method is designed to calculate uptime and downtime for a given store, timestamp, and time interval by:
+The `calculate_uptime_downtime` method is designed to calculate uptime and downtime for a given store, timestamp, and time interval by based on the active ratio:
 
-- Iterating over the time interval in hours and checking if the store is open during that hour based on the business hours.
-- Retrieving store statuses for the current hour, and based on the ratio of 'active' statuses to total statuses, calculating the uptime and downtime for the overlapping period between business hours and the current hour.
-- Accumulating uptime and downtime values and returning them in minutes.
-- If no data is available for the current hour, checking the previous hour, the same hour on the previous day, and the same day of the previous week.
-- Calculating the active ratio for that hour based on the available data and using it to interpolate the uptime and downtime for the current hour.
-- **Assuming the store is open for that hour if no data is available from all of the above checks.**
+1. **Previous Hour:**
+    - The function first tries to get the active ratio from the previous hour by calling the `get_active_ratio_from_interval` function with the store ID, the start time minus one hour, and the start time.
+    - If a value is returned, it is used as the active ratio.
 
+2. **Entire Day Up to Start Time:**
+    - If the previous step fails, the function tries to get the active ratio for the entire day up to the start time by calling `get_active_ratio_from_interval` with the store ID, the start of the business hour for that day, and the start time.
+    - If a value is returned, it is used as the active ratio.
+
+3. **Same Hour on Previous Day:**
+    - If step 2 fails, the function tries to get the active ratio for the same hour on the previous day by calling `get_active_ratio_from_interval` with the store ID, the start time minus one day, and the start time minus one day plus one hour.
+    - If a value is returned, it is used as the active ratio.
+
+4. **Entire Previous Day:**
+    - If step 3 fails, the function tries to get the active ratio for the entire previous day by determining the day of the week for the start time and using the `business_hours` dictionary to get the business hours for that day of the week and store ID.
+    - It then calls `get_active_ratio_from_interval` with the store ID, the start of the business hour for the previous day, and the start time.
+    - If a value is returned, it is used as the active ratio.
+
+5. **Same Day of Previous Week:**
+    - If step 4 fails, the function tries to get the active ratio for the same day of the previous week by calling `get_active_ratio_from_interval` with the store ID, the start of the business hour for that day of the week, and the end of the business hour for that day of the week.
+    - If a value is returned, it is used as the active ratio.
+
+6. **Default Case:**
+    - If all previous steps fail, the function assumes the store was not open during that hour and returns an active ratio of 0.
 ---
 
 ### **Active Ratio Calculation**
@@ -74,7 +90,7 @@ The active ratio calculation involves two main steps:
 
 2. **Calculate Active Ratio:**
     - If there were `store_statuses` retrieved, the function calculates the active ratio for the hour by dividing `active_periods` by the total number of `store_statuses` (i.e., the length of the list).
-    - This value represents the proportion of time within the hour that the store was active.
+    - **This value represents the proportion of time within the hour that the store was active.**
 
 ---
 
